@@ -6,9 +6,15 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from socratic_system.core.insight_categorizer import InsightCategorizer
-from socratic_system.core.project_categories import get_phase_categories
-from socratic_system.models import CategoryScore, PhaseMaturity
+from .insight_categorizer import InsightCategorizer
+from .project_categories import get_phase_categories
+
+try:
+    from socratic_maturity import CategoryScore, PhaseMaturity
+except ImportError:
+    # Fallback when socratic_maturity not available
+    CategoryScore = None
+    PhaseMaturity = None
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +80,7 @@ class MaturityCalculator:
         self.categorizer = InsightCategorizer(claude_client)
         logger.debug("Claude client set successfully")
 
-    def calculate_phase_maturity(self, phase_specs: List[Dict], phase: str) -> PhaseMaturity:
+    def calculate_phase_maturity(self, phase_specs: List[Dict], phase: str) -> "PhaseMaturity":
         """
         Calculate maturity for a phase using confidence-weighted, capped algorithm.
 
@@ -391,7 +397,7 @@ class MaturityCalculator:
         )
         return categorized
 
-    def is_phase_complete(self, maturity: PhaseMaturity) -> bool:
+    def is_phase_complete(self, maturity: "PhaseMaturity") -> bool:
         """Check if phase maturity is at 100%"""
         is_complete = maturity.overall_score >= self.COMPLETE_THRESHOLD
         logger.debug(
@@ -399,7 +405,7 @@ class MaturityCalculator:
         )
         return is_complete
 
-    def is_ready_to_advance(self, maturity: PhaseMaturity) -> bool:
+    def is_ready_to_advance(self, maturity: "PhaseMaturity") -> bool:
         """Check if phase maturity meets the ready threshold (recommended threshold)"""
         is_ready = maturity.overall_score >= self.READY_THRESHOLD
         logger.debug(
