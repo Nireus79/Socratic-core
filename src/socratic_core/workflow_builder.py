@@ -9,17 +9,10 @@ import logging
 import uuid
 from typing import Dict, List, Optional
 
-from socratic_system.models.project import ProjectContext
-from socratic_system.models.workflow import (
-    PathDecisionStrategy,
-    WorkflowDefinition,
     WorkflowEdge,
     WorkflowNode,
-    WorkflowNodeType,
-)
 
 logger = logging.getLogger(__name__)
-
 
 class WorkflowBuilder:
     """Builder for constructing workflow definitions with fluent API"""
@@ -80,13 +73,11 @@ class WorkflowBuilder:
             estimated_tokens=estimated_tokens,
             questions=questions or [],
             metadata=metadata or {},
-        )
 
         self.nodes[node_id] = node
 
         logger.debug(
             f"Added node {node_id}: {label} ({node_type.value}, {estimated_tokens} tokens)"
-        )
 
         return self
 
@@ -117,7 +108,6 @@ class WorkflowBuilder:
             probability=probability,
             condition=condition,
             cost=cost,
-        )
 
         self.edges.append(edge)
 
@@ -182,7 +172,7 @@ class WorkflowBuilder:
         logger.debug(f"Set metadata: {key} = {value}")
         return self
 
-    def build(self) -> WorkflowDefinition:
+    def build(self) -> "WorkflowDefinition":
         """
         Build and return the workflow definition.
 
@@ -213,22 +203,18 @@ class WorkflowBuilder:
             end_nodes=self.end_nodes,
             strategy=self.strategy,
             metadata=self.metadata,
-        )
 
         logger.info(
             f"Built workflow {self.workflow_id}: {len(self.nodes)} nodes, "
             f"{len(self.edges)} edges, strategy={self.strategy}"
-        )
 
         return workflow
-
 
 # ============================================================================
 # Factory Methods for Common Workflows
 # ============================================================================
 
-
-def create_discovery_workflow_simple(project: ProjectContext) -> WorkflowDefinition:
+def create_discovery_workflow_simple(project: "ProjectContext") -> "WorkflowDefinition":
     """
     Create a simple discovery workflow (basic coverage).
 
@@ -242,7 +228,7 @@ def create_discovery_workflow_simple(project: ProjectContext) -> WorkflowDefinit
     Risk: High (many missing categories)
 
     Args:
-        project: ProjectContext for project information
+        project: "ProjectContext" for project information
 
     Returns:
         WorkflowDefinition for simple discovery
@@ -252,7 +238,6 @@ def create_discovery_workflow_simple(project: ProjectContext) -> WorkflowDefinit
     builder = WorkflowBuilder(
         name="Discovery - Simple",
         phase="discovery",
-    )
 
     # Start node
     builder.add_node("start", WorkflowNodeType.PHASE_START, "Discovery Start", 0)
@@ -267,7 +252,6 @@ def create_discovery_workflow_simple(project: ProjectContext) -> WorkflowDefinit
             "target_categories": ["goals", "requirements", "tech_stack"],
             "question_count": 3,
         },
-    )
 
     # Analysis node
     builder.add_node(
@@ -275,7 +259,6 @@ def create_discovery_workflow_simple(project: ProjectContext) -> WorkflowDefinit
         WorkflowNodeType.ANALYSIS,
         "Analyze Responses",
         estimated_tokens=5000,
-    )
 
     # End node
     builder.add_node("end", WorkflowNodeType.PHASE_END, "Discovery Complete", 0)
@@ -294,8 +277,7 @@ def create_discovery_workflow_simple(project: ProjectContext) -> WorkflowDefinit
 
     return builder.build()
 
-
-def create_discovery_workflow_comprehensive(project: ProjectContext) -> WorkflowDefinition:
+def create_discovery_workflow_comprehensive(project: "ProjectContext") -> "WorkflowDefinition":
     """
     Create a comprehensive discovery workflow (deep coverage).
 
@@ -313,7 +295,7 @@ def create_discovery_workflow_comprehensive(project: ProjectContext) -> Workflow
     Risk: Moderate (balanced approach)
 
     Args:
-        project: ProjectContext for project information
+        project: "ProjectContext" for project information
 
     Returns:
         WorkflowDefinition for comprehensive discovery
@@ -323,7 +305,6 @@ def create_discovery_workflow_comprehensive(project: ProjectContext) -> Workflow
     builder = WorkflowBuilder(
         name="Discovery - Comprehensive",
         phase="discovery",
-    )
 
     # Start node
     builder.add_node("start", WorkflowNodeType.PHASE_START, "Discovery Start", 0)
@@ -346,7 +327,6 @@ def create_discovery_workflow_comprehensive(project: ProjectContext) -> Workflow
             ],
             "question_count": 6,
         },
-    )
 
     # Analysis node
     builder.add_node(
@@ -354,7 +334,6 @@ def create_discovery_workflow_comprehensive(project: ProjectContext) -> Workflow
         WorkflowNodeType.ANALYSIS,
         "Analyze Responses",
         estimated_tokens=5000,
-    )
 
     # Validation node
     builder.add_node(
@@ -362,7 +341,6 @@ def create_discovery_workflow_comprehensive(project: ProjectContext) -> Workflow
         WorkflowNodeType.VALIDATION,
         "Validate Coverage",
         estimated_tokens=3000,
-    )
 
     # End node
     builder.add_node("end", WorkflowNodeType.PHASE_END, "Discovery Complete", 0)
@@ -382,10 +360,9 @@ def create_discovery_workflow_comprehensive(project: ProjectContext) -> Workflow
 
     return builder.build()
 
-
 def create_discovery_workflow_with_alternatives(
-    project: ProjectContext,
-) -> WorkflowDefinition:
+    project: "ProjectContext",
+) -> "WorkflowDefinition":
     """
     Create discovery workflow with branching paths (simple vs comprehensive).
 
@@ -396,7 +373,7 @@ def create_discovery_workflow_with_alternatives(
     Both paths lead to same Analysis/Validation/End nodes.
 
     Args:
-        project: ProjectContext for project information
+        project: "ProjectContext" for project information
 
     Returns:
         WorkflowDefinition with alternative paths
@@ -406,7 +383,6 @@ def create_discovery_workflow_with_alternatives(
     builder = WorkflowBuilder(
         name="Discovery - Alternatives",
         phase="discovery",
-    )
 
     # Start node
     builder.add_node("start", WorkflowNodeType.PHASE_START, "Discovery Start", 0)
@@ -421,7 +397,6 @@ def create_discovery_workflow_with_alternatives(
             "target_categories": ["goals", "requirements", "tech_stack"],
             "question_count": 3,
         },
-    )
 
     # Path B: Standard
     builder.add_node(
@@ -440,7 +415,6 @@ def create_discovery_workflow_with_alternatives(
             ],
             "question_count": 6,
         },
-    )
 
     # Common nodes after questions
     builder.add_node(
@@ -448,14 +422,12 @@ def create_discovery_workflow_with_alternatives(
         WorkflowNodeType.ANALYSIS,
         "Analyze Responses",
         estimated_tokens=5000,
-    )
 
     builder.add_node(
         "validation",
         WorkflowNodeType.VALIDATION,
         "Validate Coverage",
         estimated_tokens=3000,
-    )
 
     builder.add_node("end", WorkflowNodeType.PHASE_END, "Discovery Complete", 0)
 
@@ -480,8 +452,7 @@ def create_discovery_workflow_with_alternatives(
 
     return builder.build()
 
-
-def create_legacy_compatible_workflow(phase: str) -> WorkflowDefinition:
+def create_legacy_compatible_workflow(phase: str) -> "WorkflowDefinition":
     """
     Create minimal workflow that maintains backward compatibility.
 
@@ -500,7 +471,6 @@ def create_legacy_compatible_workflow(phase: str) -> WorkflowDefinition:
     builder = WorkflowBuilder(
         name=f"{phase.capitalize()} - Legacy",
         phase=phase,
-    )
 
     # Minimal workflow
     builder.add_node("start", WorkflowNodeType.PHASE_START, "Phase Start", 0)
@@ -511,7 +481,6 @@ def create_legacy_compatible_workflow(phase: str) -> WorkflowDefinition:
         "Questions",
         estimated_tokens=15000,
         metadata={"legacy_mode": True},
-    )
 
     builder.add_node("end", WorkflowNodeType.PHASE_END, "Phase Complete", 0)
 

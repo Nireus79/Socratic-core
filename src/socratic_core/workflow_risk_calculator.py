@@ -8,12 +8,9 @@ complexity, and rework probability for workflow paths.
 import logging
 from typing import Any, Dict, List
 
-from socratic_system.core.project_categories import get_phase_categories
-from socratic_system.models.project import ProjectContext
-from socratic_system.models.workflow import WorkflowDefinition, WorkflowPath
+from .project_categories import get_phase_categories
 
 logger = logging.getLogger(__name__)
-
 
 class WorkflowRiskCalculator:
     """Calculate comprehensive risk assessment for workflow paths"""
@@ -29,9 +26,9 @@ class WorkflowRiskCalculator:
 
     def calculate_path_risk(
         self,
-        path: WorkflowPath,
-        workflow: WorkflowDefinition,
-        project: ProjectContext,
+        path: "WorkflowPath",
+        workflow: "WorkflowDefinition",
+        project: "ProjectContext",
     ) -> Dict[str, Any]:
         """
         Calculate comprehensive risk score for a workflow path.
@@ -39,9 +36,9 @@ class WorkflowRiskCalculator:
         Combines multiple risk dimensions into a weighted overall score.
 
         Args:
-            path: WorkflowPath to assess
-            workflow: WorkflowDefinition containing node metadata
-            project: ProjectContext for category and project information
+            path: "WorkflowPath" to assess
+            workflow: "WorkflowDefinition" containing node metadata
+            project: "ProjectContext" for category and project information
 
         Returns:
             Dict with:
@@ -62,14 +59,12 @@ class WorkflowRiskCalculator:
         # 3. Calculate rework risk (probability of redo)
         rework_risk = self._calculate_rework_probability(
             path, workflow, project, incompleteness_risk
-        )
 
         # Weighted overall risk score
         risk_score = (
             (incompleteness_risk * self.INCOMPLETENESS_WEIGHT)
             + (complexity_risk * self.COMPLEXITY_WEIGHT)
             + (rework_risk * self.REWORK_WEIGHT)
-        )
 
         # Get missing categories for detailed reporting
         missing_categories = self._get_missing_categories(path, workflow, project)
@@ -78,7 +73,6 @@ class WorkflowRiskCalculator:
             f"Path {path.path_id} risk assessment: "
             f"overall={risk_score:.1f}, incompleteness={incompleteness_risk:.1f}, "
             f"complexity={complexity_risk:.1f}, rework={rework_risk:.1f}"
-        )
 
         return {
             "risk_score": risk_score,
@@ -90,9 +84,9 @@ class WorkflowRiskCalculator:
 
     def _calculate_incompleteness_risk(
         self,
-        path: WorkflowPath,
-        workflow: WorkflowDefinition,
-        project: ProjectContext,
+        path: "WorkflowPath",
+        workflow: "WorkflowDefinition",
+        project: "ProjectContext",
     ) -> float:
         """
         Calculate incompleteness risk (coverage gaps).
@@ -100,9 +94,9 @@ class WorkflowRiskCalculator:
         Based on percentage of phase categories not addressed by this path.
 
         Args:
-            path: WorkflowPath to assess
-            workflow: WorkflowDefinition
-            project: ProjectContext with project_type
+            path: "WorkflowPath" to assess
+            workflow: "WorkflowDefinition"
+            project: "ProjectContext" with project_type
 
         Returns:
             Risk percentage (0-100)
@@ -132,7 +126,6 @@ class WorkflowRiskCalculator:
 
             logger.debug(
                 f"Incompleteness risk: {missing_count}/{total_count} = {incompleteness_risk:.1f}%"
-            )
 
             return incompleteness_risk
 
@@ -140,15 +133,15 @@ class WorkflowRiskCalculator:
             logger.error(f"Error calculating incompleteness risk: {e}")
             return 50.0  # Default to moderate risk on error
 
-    def _calculate_complexity_risk(self, path: WorkflowPath, workflow: WorkflowDefinition) -> float:
+    def _calculate_complexity_risk(self, path: "WorkflowPath", workflow: "WorkflowDefinition") -> float:
         """
         Calculate complexity risk (technical difficulty).
 
         Based on number of questions and analysis depth in the path.
 
         Args:
-            path: WorkflowPath to assess
-            workflow: WorkflowDefinition
+            path: "WorkflowPath" to assess
+            workflow: "WorkflowDefinition"
 
         Returns:
             Risk percentage (0-100)
@@ -187,9 +180,9 @@ class WorkflowRiskCalculator:
 
     def _calculate_rework_probability(
         self,
-        path: WorkflowPath,
-        workflow: WorkflowDefinition,
-        project: ProjectContext,
+        path: "WorkflowPath",
+        workflow: "WorkflowDefinition",
+        project: "ProjectContext",
         incompleteness_risk: float,
     ) -> float:
         """
@@ -198,9 +191,9 @@ class WorkflowRiskCalculator:
         High incompleteness or gaps lead to higher rework probability.
 
         Args:
-            path: WorkflowPath
-            workflow: WorkflowDefinition
-            project: ProjectContext
+            path: "WorkflowPath"
+            workflow: "WorkflowDefinition"
+            project: "ProjectContext"
             incompleteness_risk: Already calculated incompleteness
 
         Returns:
@@ -223,17 +216,16 @@ class WorkflowRiskCalculator:
         logger.debug(
             f"Rework probability: base={rework_base:.1f}%, "
             f"length={length_risk:.1f}%, missing={missing_risk:.1f}% = {rework_probability:.1f}%"
-        )
 
         return rework_probability
 
-    def _get_covered_categories(self, path: WorkflowPath, workflow: WorkflowDefinition) -> set:
+    def _get_covered_categories(self, path: "WorkflowPath", workflow: "WorkflowDefinition") -> set:
         """
         Identify which categories are covered by this path.
 
         Args:
-            path: WorkflowPath
-            workflow: WorkflowDefinition
+            path: "WorkflowPath"
+            workflow: "WorkflowDefinition"
 
         Returns:
             Set of covered category names
@@ -261,17 +253,17 @@ class WorkflowRiskCalculator:
 
     def _get_missing_categories(
         self,
-        path: WorkflowPath,
-        workflow: WorkflowDefinition,
-        project: ProjectContext,
+        path: "WorkflowPath",
+        workflow: "WorkflowDefinition",
+        project: "ProjectContext",
     ) -> List[str]:
         """
         Get list of categories not covered by this path.
 
         Args:
-            path: WorkflowPath
-            workflow: WorkflowDefinition
-            project: ProjectContext
+            path: "WorkflowPath"
+            workflow: "WorkflowDefinition"
+            project: "ProjectContext"
 
         Returns:
             List of uncovered category names
