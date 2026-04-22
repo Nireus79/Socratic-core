@@ -8,7 +8,7 @@ def test_analytics_calculator_can_import():
         assert hasattr(ac_mod, 'AnalyticsCalculator')
     except ModuleNotFoundError as e:
         assert False, f"Failed to import due to missing module: {e}"
-    except ImportError as e:
+    except ImportError:
         # Other import errors are acceptable (cross-library deps)
         pass
 
@@ -53,11 +53,10 @@ def test_maturity_calculator_can_import():
 def test_no_socratic_system_imports():
     """Verify no active socratic_system imports in source files."""
     import os
-    import re
-    
+
     src_dir = 'src/socratic_core'
     found_imports = []
-    
+
     for root, dirs, files in os.walk(src_dir):
         for file in files:
             if file.endswith('.py'):
@@ -67,5 +66,5 @@ def test_no_socratic_system_imports():
                         # Check for uncommented imports from socratic_system
                         if 'from socratic_system' in line and not line.strip().startswith('#'):
                             found_imports.append(f"{filepath}:{i}: {line.strip()}")
-    
-    assert len(found_imports) == 0, f"Found active socratic_system imports:\n" + "\n".join(found_imports)
+
+    assert len(found_imports) == 0, "Found active socratic_system imports:\n" + "\n".join(found_imports)

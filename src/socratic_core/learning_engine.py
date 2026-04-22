@@ -8,6 +8,7 @@ This module handles all learning-related calculations without database dependenc
 - Question effectiveness scoring
 - Behavior pattern analysis
 """
+from __future__ import annotations
 
 import logging
 from typing import Any, Dict, List, Optional, Tuple

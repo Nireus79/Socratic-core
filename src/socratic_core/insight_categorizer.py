@@ -4,13 +4,14 @@ Claude-powered insight categorization for intelligent spec mapping.
 Uses Claude to understand insight content and map to appropriate categories
 based on project type and phase context.
 """
+from __future__ import annotations
 
 import json
 import logging
 from datetime import datetime
 from typing import Dict, List
 
-from .project_categories import (
+from socratic_system.core.project_categories import (
     get_phase_categories,
     get_project_type_description,
 )

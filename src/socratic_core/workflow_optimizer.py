@@ -4,18 +4,26 @@ Workflow optimizer orchestrating path enumeration, cost/risk calculation, and pa
 Main engine for evaluating all workflow paths and recommending the optimal one
 based on the selected strategy.
 """
+from __future__ import annotations
 
 import logging
 import uuid
 from datetime import datetime
 from typing import List
 
-from .workflow_cost_calculator import WorkflowCostCalculator
-from .workflow_path_finder import WorkflowPathFinder
-from .workflow_risk_calculator import WorkflowRiskCalculator
+from socratic_system.core.workflow_cost_calculator import WorkflowCostCalculator
+from socratic_system.core.workflow_path_finder import WorkflowPathFinder
+from socratic_system.core.workflow_risk_calculator import WorkflowRiskCalculator
+from socratic_system.models.project import ProjectContext
+from socratic_system.models.workflow import (
+    PathDecisionStrategy,
+    WorkflowApprovalRequest,
+    WorkflowDefinition,
     WorkflowPath,
+)
 
 logger = logging.getLogger(__name__)
+
 
 class WorkflowOptimizer:
     """Orchestrates workflow optimization including path enumeration and selection"""
@@ -30,11 +38,11 @@ class WorkflowOptimizer:
 
     def optimize_workflow(
         self,
-        workflow: "WorkflowDefinition",
-        project: "ProjectContext",
+        workflow: WorkflowDefinition,
+        project: ProjectContext,
         strategy: PathDecisionStrategy,
         requested_by: str = "system",
-    ) -> "WorkflowApprovalRequest":
+    ) -> WorkflowApprovalRequest:
         """
         Main entry point for workflow optimization.
 
@@ -42,8 +50,8 @@ class WorkflowOptimizer:
         and returns approval request.
 
         Args:
-            workflow: "WorkflowDefinition" to optimize
-            project: "ProjectContext" for context information
+            workflow: WorkflowDefinition to optimize
+            project: ProjectContext for context information
             strategy: PathDecisionStrategy to use for selection
             requested_by: User/agent requesting optimization
 
@@ -56,6 +64,7 @@ class WorkflowOptimizer:
         logger.info(
             f"Starting workflow optimization for {workflow.workflow_id} "
             f"using strategy {strategy.value}"
+        )
 
         # Step 1: Find all paths
         logger.debug("Step 1: Enumerating workflow paths")
@@ -88,21 +97,23 @@ class WorkflowOptimizer:
             created_at=datetime.now().isoformat(),
             requested_by=requested_by,
             status="pending",
+        )
 
         logger.info(
             f"Workflow optimization complete. "
             f"Recommended path: {recommended_path.path_id} "
             f"(cost: {recommended_path.total_cost_tokens} tokens, "
             f"risk: {recommended_path.risk_score:.1f}%)"
+        )
 
         return approval_request
 
-    def _find_all_paths(self, workflow: "WorkflowDefinition") -> List[WorkflowPath]:
+    def _find_all_paths(self, workflow: WorkflowDefinition) -> List[WorkflowPath]:
         """
         Find all valid paths through workflow graph.
 
         Args:
-            workflow: "WorkflowDefinition"
+            workflow: WorkflowDefinition
 
         Returns:
             List of WorkflowPath objects
@@ -122,16 +133,16 @@ class WorkflowOptimizer:
     def _calculate_path_metrics(
         self,
         paths: List[WorkflowPath],
-        workflow: "WorkflowDefinition",
-        project: "ProjectContext",
+        workflow: WorkflowDefinition,
+        project: ProjectContext,
     ) -> List[WorkflowPath]:
         """
         Calculate cost, risk, and quality metrics for all paths.
 
         Args:
             paths: List of paths to evaluate
-            workflow: "WorkflowDefinition"
-            project: "ProjectContext"
+            workflow: WorkflowDefinition
+            project: ProjectContext
 
         Returns:
             Updated paths with calculated metrics
@@ -155,17 +166,19 @@ class WorkflowOptimizer:
             path.expected_maturity_gain = self._calculate_expected_maturity_gain(path, project)
             path.roi_score = self._calculate_roi(
                 path, cost_metrics["total_tokens"], path.expected_maturity_gain
+            )
 
             logger.debug(
                 f"Path {path.path_id}: {path.total_cost_tokens} tokens, "
                 f"risk={path.risk_score:.1f}, quality={path.quality_score:.1f}, "
                 f"roi={path.roi_score:.2f}"
+            )
 
         return paths
 
     def _select_optimal_path(
         self, paths: List[WorkflowPath], strategy: PathDecisionStrategy
-    ) -> "WorkflowPath":
+    ) -> WorkflowPath:
         """
         Select best path based on strategy.
 
@@ -203,19 +216,24 @@ class WorkflowOptimizer:
                     path.total_cost_tokens,
                     [p.total_cost_tokens for p in paths],
                     invert=True,  # Lower is better
+                )
                 normalized_risk = self._normalize_value(
                     path.risk_score, [p.risk_score for p in paths], invert=True
+                )
                 normalized_quality = self._normalize_value(
                     path.quality_score, [p.quality_score for p in paths]
+                )
 
                 combined_score = (
                     (normalized_cost * 0.5) + (normalized_risk * 0.3) + (normalized_quality * 0.2)
+                )
 
                 scores.append((path, combined_score))
                 logger.debug(
                     f"Path {path.path_id} balanced score: {combined_score:.3f} "
                     f"(cost={normalized_cost:.3f}, risk={normalized_risk:.3f}, "
                     f"quality={normalized_quality:.3f})"
+                )
 
             # Select path with highest combined score
             best_path = max(scores, key=lambda x: x[1])[0]
@@ -224,7 +242,7 @@ class WorkflowOptimizer:
         else:  # USER_CHOICE
             return paths[0]
 
-    def _calculate_quality_score(self, path: "WorkflowPath", project: "ProjectContext") -> float:
+    def _calculate_quality_score(self, path: WorkflowPath, project: ProjectContext) -> float:
         """
         Calculate quality score for a path.
 
@@ -232,8 +250,8 @@ class WorkflowOptimizer:
         Higher is better.
 
         Args:
-            path: "WorkflowPath" to score
-            project: "ProjectContext"
+            path: WorkflowPath to score
+            project: ProjectContext
 
         Returns:
             Quality score (0-100)
@@ -253,7 +271,7 @@ class WorkflowOptimizer:
         return quality
 
     def _calculate_expected_maturity_gain(
-        self, path: "WorkflowPath", project: "ProjectContext"
+        self, path: WorkflowPath, project: ProjectContext
     ) -> float:
         """
         Estimate maturity points this path will gain.
@@ -261,8 +279,8 @@ class WorkflowOptimizer:
         Based on coverage and complexity.
 
         Args:
-            path: "WorkflowPath"
-            project: "ProjectContext"
+            path: WorkflowPath
+            project: ProjectContext
 
         Returns:
             Expected maturity gain (0-100)
@@ -278,14 +296,14 @@ class WorkflowOptimizer:
 
         return expected_gain
 
-    def _calculate_roi(self, path: "WorkflowPath", tokens: int, maturity_gain: float) -> float:
+    def _calculate_roi(self, path: WorkflowPath, tokens: int, maturity_gain: float) -> float:
         """
         Calculate ROI (return on investment) for a path.
 
         ROI = maturity_gain / tokens (points per token)
 
         Args:
-            path: "WorkflowPath"
+            path: WorkflowPath
             tokens: Token cost
             maturity_gain: Expected maturity gain
 

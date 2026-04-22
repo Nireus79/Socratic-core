@@ -4,11 +4,15 @@ Workflow cost calculator for estimating API token consumption
 Calculates total token costs for workflow paths including node processing
 and edge transitions, with currency conversion.
 """
+from __future__ import annotations
 
 import logging
 from typing import Any, Dict
 
+from socratic_system.models.workflow import WorkflowDefinition, WorkflowPath
+
 logger = logging.getLogger(__name__)
+
 
 class WorkflowCostCalculator:
     """Calculate API token costs for workflow paths"""
@@ -29,7 +33,7 @@ class WorkflowCostCalculator:
         logger.debug("WorkflowCostCalculator initialized")
 
     def calculate_path_cost(
-        self, path: "WorkflowPath", workflow: "WorkflowDefinition"
+        self, path: WorkflowPath, workflow: WorkflowDefinition
     ) -> Dict[str, Any]:
         """
         Calculate total token cost for a workflow path.
@@ -38,8 +42,8 @@ class WorkflowCostCalculator:
         then converts to USD.
 
         Args:
-            path: "WorkflowPath" to calculate cost for
-            workflow: "WorkflowDefinition" containing node definitions
+            path: WorkflowPath to calculate cost for
+            workflow: WorkflowDefinition containing node definitions
 
         Returns:
             Dict with:
@@ -87,12 +91,12 @@ class WorkflowCostCalculator:
 
         return result
 
-    def _find_edge_cost(self, workflow: "WorkflowDefinition", edge_id: str) -> int:
+    def _find_edge_cost(self, workflow: WorkflowDefinition, edge_id: str) -> int:
         """
         Find cost (tokens) for an edge by ID.
 
         Args:
-            workflow: "WorkflowDefinition" containing edges
+            workflow: WorkflowDefinition containing edges
             edge_id: ID of edge to find cost for
 
         Returns:

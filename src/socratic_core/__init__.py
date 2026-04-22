@@ -1,6 +1,7 @@
 """
 Core calculation and utility modules for Socratic system
 """
+from __future__ import annotations
 
 from .analytics_calculator import AnalyticsCalculator
 from .insight_categorizer import InsightCategorizer

@@ -5,6 +5,7 @@ Defines category targets for different project types across all 4 phases.
 Each category has a target point value (max contribution to phase maturity).
 Total per phase: 90 points (ensures balanced, normalized scoring across types).
 """
+from __future__ import annotations
 
 # Generic categories - work for any project type
 GENERIC_PHASE_CATEGORIES = {

@@ -4,27 +4,32 @@ Workflow path finder using Depth-First Search (DFS) algorithm
 Enumerates all valid paths through a workflow graph from start node
 to any end node, handling cycles and multiple possible routes.
 """
+from __future__ import annotations
 
 import logging
 from typing import Dict, List, Set, Tuple
 
+from socratic_system.models.workflow import WorkflowDefinition, WorkflowPath
+
 logger = logging.getLogger(__name__)
+
 
 class WorkflowPathFinder:
     """Find all valid paths through a workflow graph using DFS"""
 
-    def __init__(self, workflow: "WorkflowDefinition"):
+    def __init__(self, workflow: WorkflowDefinition):
         """
         Initialize path finder with a workflow definition.
 
         Args:
-            workflow: "WorkflowDefinition" to analyze
+            workflow: WorkflowDefinition to analyze
         """
         self.workflow = workflow
         self.adjacency_list = self._build_adjacency_list()
         logger.debug(
             f"WorkflowPathFinder initialized for workflow {workflow.workflow_id} "
             f"with {len(workflow.nodes)} nodes and {len(workflow.edges)} edges"
+        )
 
     def find_all_paths(self) -> List[WorkflowPath]:
         """
@@ -38,6 +43,7 @@ class WorkflowPathFinder:
         """
         logger.debug(
             f"Finding all paths from '{self.workflow.start_node}' to {self.workflow.end_nodes}"
+        )
 
         all_paths = []
 
@@ -51,6 +57,7 @@ class WorkflowPathFinder:
                 visited=set(),
                 current_path_nodes=[],
                 current_path_edges=[],
+            )
 
             logger.debug(f"Found {len(paths)} paths to {end_node}")
             all_paths.extend(paths)
@@ -61,6 +68,7 @@ class WorkflowPathFinder:
         logger.info(
             f"Path enumeration complete: {len(workflow_paths)} total paths found "
             f"for workflow {self.workflow.workflow_id}"
+        )
 
         return workflow_paths
 
@@ -117,6 +125,7 @@ class WorkflowPathFinder:
                     visited=new_visited,
                     current_path_nodes=list(current_path_nodes),
                     current_path_edges=new_edges,
+                )
 
                 all_paths.extend(paths)
             else:
@@ -151,7 +160,7 @@ class WorkflowPathFinder:
         logger.debug(f"Built adjacency list with {len(adjacency_list)} nodes")
         return adjacency_list
 
-    def _create_workflow_path(self, nodes: List[str], edges: List[str]) -> "WorkflowPath":
+    def _create_workflow_path(self, nodes: List[str], edges: List[str]) -> WorkflowPath:
         """
         Create a WorkflowPath object from ordered node and edge lists.
 
@@ -170,3 +179,4 @@ class WorkflowPathFinder:
             path_id=path_id,
             nodes=nodes,
             edges=edges,
+        )

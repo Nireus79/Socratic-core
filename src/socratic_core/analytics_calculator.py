@@ -4,12 +4,13 @@ Analytics calculator for maturity tracking insights and recommendations.
 Pure computation logic for analyzing project maturity data and generating
 actionable recommendations for improvement.
 """
+from __future__ import annotations
 
 import logging
 from typing import Dict, List
 
-from .project_categories import get_phase_categories
-
+from socratic_system.core.project_categories import get_phase_categories
+from socratic_system.models import ProjectContext
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class AnalyticsCalculator:
     # Category Analysis Methods
     # ============================================================================
 
-    def analyze_category_performance(self, project: "ProjectContext") -> Dict:
+    def analyze_category_performance(self, project: ProjectContext) -> Dict:
         """
         Analyze category strengths/weaknesses across current phase.
 
@@ -111,7 +112,7 @@ class AnalyticsCalculator:
             "balance": balance,
         }
 
-    def identify_weak_categories(self, project: "ProjectContext") -> List[str]:
+    def identify_weak_categories(self, project: ProjectContext) -> List[str]:
         """Find categories consistently scoring < 30% in current phase."""
         logger.debug(f"Identifying weak categories for phase: {project.phase}")
         current_phase = project.phase
@@ -130,7 +131,7 @@ class AnalyticsCalculator:
         logger.info(f"Found {len(weak)} weak categories (< 30%) in {current_phase}: {weak}")
         return weak
 
-    def identify_strong_categories(self, project: "ProjectContext") -> List[str]:
+    def identify_strong_categories(self, project: ProjectContext) -> List[str]:
         """Find categories consistently scoring > 70% in current phase."""
         logger.debug(f"Identifying strong categories for phase: {project.phase}")
         current_phase = project.phase
@@ -149,7 +150,7 @@ class AnalyticsCalculator:
         logger.info(f"Found {len(strong)} strong categories (> 70%) in {current_phase}: {strong}")
         return strong
 
-    def analyze_category_balance(self, project: "ProjectContext") -> Dict:
+    def analyze_category_balance(self, project: ProjectContext) -> Dict:
         """
         Detect over/under investment in categories.
 
@@ -204,7 +205,7 @@ class AnalyticsCalculator:
 
         return {"status": status, "messages": messages}
 
-    def get_missing_categories(self, project: "ProjectContext") -> Dict[str, List[str]]:
+    def get_missing_categories(self, project: ProjectContext) -> Dict[str, List[str]]:
         """Get categories with 0 specs per phase."""
         logger.debug("Identifying missing categories across all phases")
         missing = {}
@@ -236,7 +237,7 @@ class AnalyticsCalculator:
     # Progression Analysis Methods
     # ============================================================================
 
-    def calculate_velocity(self, project: "ProjectContext") -> float:
+    def calculate_velocity(self, project: ProjectContext) -> float:
         """
         Calculate average maturity points gained per Q&A session.
 
@@ -264,7 +265,7 @@ class AnalyticsCalculator:
         )
         return velocity
 
-    def analyze_progression_trends(self, project: "ProjectContext") -> Dict:
+    def analyze_progression_trends(self, project: ProjectContext) -> Dict:
         """
         Analyze maturity progression over time.
 
@@ -296,7 +297,7 @@ class AnalyticsCalculator:
         )
         return result
 
-    def identify_plateaus(self, project: "ProjectContext") -> List[Dict]:
+    def identify_plateaus(self, project: ProjectContext) -> List[Dict]:
         """Find periods where maturity stagnates."""
         logger.debug("Identifying plateau periods in maturity progression")
 
@@ -342,7 +343,7 @@ class AnalyticsCalculator:
     # Recommendation Methods
     # ============================================================================
 
-    def generate_recommendations(self, project: "ProjectContext") -> List[Dict]:
+    def generate_recommendations(self, project: ProjectContext) -> List[Dict]:
         """
         Generate prioritized recommendations based on weak areas.
 
@@ -452,7 +453,7 @@ class AnalyticsCalculator:
         )
         return recommendations[:10]  # Top 10 recommendations
 
-    def suggest_next_questions(self, project: "ProjectContext", count: int = 5) -> List[str]:
+    def suggest_next_questions(self, project: ProjectContext, count: int = 5) -> List[str]:
         """Suggest questions targeting weak categories."""
         logger.debug(f"Suggesting next {count} questions for phase: {project.phase}")
 

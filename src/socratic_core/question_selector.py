@@ -4,11 +4,20 @@ Question selector for path-constrained question generation
 Selects questions aligned with current position in approved workflow path,
 ensuring questions target specific categories.
 """
+from __future__ import annotations
 
 import logging
 from typing import Any, Dict, List, Optional, Set, Union
 
+from socratic_system.models.project import ProjectContext
+from socratic_system.models.workflow import (
+    WorkflowDefinition,
+    WorkflowExecutionState,
+    WorkflowNodeType,
+)
+
 logger = logging.getLogger(__name__)
+
 
 class QuestionSelector:
     """Select questions aligned with current workflow node"""
@@ -19,9 +28,9 @@ class QuestionSelector:
 
     def select_next_questions(
         self,
-        project: "ProjectContext",
-        workflow: "WorkflowDefinition",
-        execution: "WorkflowExecutionState",
+        project: ProjectContext,
+        workflow: WorkflowDefinition,
+        execution: WorkflowExecutionState,
         max_questions: int = 1,
     ) -> List[str]:
         """
@@ -32,9 +41,9 @@ class QuestionSelector:
         2. Have not yet been covered
 
         Args:
-            project: "ProjectContext" with specifications
-            workflow: "WorkflowDefinition" with node metadata
-            execution: "WorkflowExecutionState" tracking progress
+            project: ProjectContext with specifications
+            workflow: WorkflowDefinition with node metadata
+            execution: WorkflowExecutionState tracking progress
             max_questions: Maximum questions to return
 
         Returns:
@@ -43,6 +52,7 @@ class QuestionSelector:
         logger.debug(
             f"Selecting next questions for workflow execution {execution.execution_id} "
             f"at node {execution.current_node_id}"
+        )
 
         # Get current node
         current_node = workflow.nodes.get(execution.current_node_id)
@@ -72,6 +82,7 @@ class QuestionSelector:
         if not uncovered:
             logger.info(
                 f"All target categories already covered for node {execution.current_node_id}"
+            )
             return []
 
         logger.debug(f"Uncovered categories: {uncovered}")
@@ -79,17 +90,18 @@ class QuestionSelector:
         # Generate questions for uncovered categories
         questions = self._generate_category_targeted_questions(
             project, uncovered, current_node, max_questions
+        )
 
         logger.info(f"Generated {len(questions)} questions for node {execution.current_node_id}")
 
         return questions
 
-    def _get_covered_categories(self, project: "ProjectContext") -> Set[str]:
+    def _get_covered_categories(self, project: ProjectContext) -> Set[str]:
         """
         Identify which categories have been covered in the current phase.
 
         Args:
-            project: "ProjectContext" with specifications
+            project: ProjectContext with specifications
 
         Returns:
             Set of covered category names
@@ -114,13 +126,13 @@ class QuestionSelector:
         return covered
 
     def _generate_category_targeted_questions(
-        self, project: "ProjectContext", categories: List[str], node, max_questions: int = 1
+        self, project: ProjectContext, categories: List[str], node, max_questions: int = 1
     ) -> List[str]:
         """
         Generate questions targeting specific uncovered categories.
 
         Args:
-            project: "ProjectContext"
+            project: ProjectContext
             categories: List of categories to generate questions for
             node: WorkflowNode with metadata
             max_questions: Max questions to generate
@@ -161,6 +173,7 @@ class QuestionSelector:
         for category in categories[:max_questions]:
             template = category_question_map.get(
                 category, f"Tell me about the {category.replace('_', ' ')} for {project_name}."
+            )
 
             question = template.format(project_name=project_name)
             questions.append(question)
@@ -172,13 +185,13 @@ class QuestionSelector:
 
         return questions
 
-    def get_next_node(self, workflow: "WorkflowDefinition", execution: "WorkflowExecutionState") -> Optional[str]:
+    def get_next_node(self, workflow: WorkflowDefinition, execution: WorkflowExecutionState) -> Optional[str]:
         """
         Get the next node ID to advance to after current node completes.
 
         Args:
-            workflow: "WorkflowDefinition"
-            execution: "WorkflowExecutionState"
+            workflow: WorkflowDefinition
+            execution: WorkflowExecutionState
 
         Returns:
             ID of next node, or None if no valid next node
@@ -203,14 +216,14 @@ class QuestionSelector:
         return next_nodes[0]
 
     def is_execution_complete(
-        self, execution: "WorkflowExecutionState", workflow: "WorkflowDefinition"
+        self, execution: WorkflowExecutionState, workflow: WorkflowDefinition
     ) -> bool:
         """
         Check if workflow execution has reached an end node.
 
         Args:
-            execution: "WorkflowExecutionState"
-            workflow: "WorkflowDefinition"
+            execution: WorkflowExecutionState
+            workflow: WorkflowDefinition
 
         Returns:
             True if current node is an end node
@@ -218,4 +231,5 @@ class QuestionSelector:
         is_complete = execution.current_node_id in workflow.end_nodes
         logger.debug(
             f"Execution complete check: {execution.current_node_id} in {workflow.end_nodes} = {is_complete}"
+        )
         return is_complete
