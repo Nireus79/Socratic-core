@@ -7,7 +7,7 @@
 **Current Version**: 0.1.1
 **Python Support**: 3.8+
 **License**: MIT
-**Status**: Production Ready
+**Status**: Alpha
 
 ## What This Library Does
 

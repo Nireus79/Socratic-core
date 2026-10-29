@@ -72,7 +72,7 @@ SQLiteClient │  PostgresClient  Mongo*
 
 **Key Classes**:
 - `DatabaseClient`: Abstract interface defining CRUD operations
-- `SQLiteClient`: SQLite implementation (production-ready)
+- `SQLiteClient`: SQLite implementation
 - `PostgresClient`: PostgreSQL stub (planned)
 
 **CRUD Operations**:
